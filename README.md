@@ -1,1 +1,2 @@
 # MAL-Bot
+**Commands**
