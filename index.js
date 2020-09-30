@@ -89,16 +89,21 @@ client.on("message", async msg => {
             var commands = [];
             for (item of command.split(" ")) if (item != "") commands.push(item);
 
-            if ((commands[0] == "anime" || commands[0] == "manga" || commands[0] == "character" || commands[0] == "person") && parseInt(commands[1]) == NaN) throw "Invalid Usage";
-
-            if (commands[0] === "anime") msg.channel.send(anime(await mal.findAnime(parseInt(commands[1]))));
-            else if (commands[0] === "manga") msg.channel.send(manga(await mal.findManga(parseInt(commands[1]))));
-            else if (commands[0] === "character") msg.channel.send(character(await mal.findCharacter(parseInt(commands[1]))));
-            else if (commands[0] === "person") msg.channel.send(person(await mal.findPerson(parseInt(commands[1]))));
-            else if (commands[0] === "search") search(commands, msg);
-            else if (commands[0] === "top") top(commands, msg);
-            else if (commands[0] === "season") season(commands, msg);
-            else if (commands[0] === "genre") genre(commands, msg);
+            if (commands[0] == "anime" || commands[0] == "manga" || commands[0] == "character" || commands[0] == "person") {
+                if (String(parseInt(commands[1])) == commands[1]) {
+                    if (commands[0] === "anime") msg.channel.send(anime(await mal.findAnime(parseInt(commands[1]))));
+                    else if (commands[0] === "manga") msg.channel.send(manga(await mal.findManga(parseInt(commands[1]))));
+                    else if (commands[0] === "character") msg.channel.send(character(await mal.findCharacter(parseInt(commands[1]))));
+                    else if (commands[0] === "person") msg.channel.send(person(await mal.findPerson(parseInt(commands[1]))));
+                } else {
+                    search(([""]).concat(commands), msg)
+                }
+            } else {
+                if (commands[0] === "search") search(commands, msg);
+                else if (commands[0] === "top") top(commands, msg);
+                else if (commands[0] === "season") season(commands, msg);
+                else if (commands[0] === "genre") genre(commands, msg);
+            }
         } catch (error) {
             msg.channel.send(`**${msg.member.nickname ? msg.member.nickname : msg.author.username}**: ${error}`);
         }

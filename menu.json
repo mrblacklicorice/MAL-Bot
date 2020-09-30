@@ -17,6 +17,10 @@
             "value": "gives an example on how to use it"
         },
         {
+            "name": "{type}[[\"anime\", \"manga\", \"person\", \"character\"]",
+            "value": "gives a list of results when given an {title}[STRING]"
+        },
+        {
             "name": "anime",
             "value": "displays anime when given its `{id}[INTGER]`"
         },
