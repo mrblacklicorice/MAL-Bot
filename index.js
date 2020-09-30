@@ -73,7 +73,7 @@ client.on("message", async msg => {
         }
 
     } else if (command === "ping") {
-        msg.channel.send(`**${msg.member.nickname ? msg.member.nickname : msg.author.username}**: Pong! This message had a latency of ${Date.now() - msg.createdTimestamp}ms.`);
+        msg.channel.send(`**${msg.member.nickname ? msg.member.nickname : msg.author.username}**: Pong! This message had a latency of ${msg.createdTimestamp - Date.now()}ms.`);
     } else if (command === "about") {
         msg.channel.send("Hello **" + msg.member.nickname + "**! I'm MAL-Bot and I display information from My AnimeList using the Jikan(時間) API");
         msg.channel.send("You can find me here: <https://github.com/mrblacklicorice/MAL-Bot/blob/master/README.md>");
