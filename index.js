@@ -5,7 +5,6 @@ const client = new Discord.Client();
 const Jikan = require('jikan-node');
 const mal = new Jikan();
 const fetch = require('cross-fetch');
-const { randomBytes } = require("crypto");
 const URL = require('url').URL;
 
 client.login(config.BOT_TOKEN);
