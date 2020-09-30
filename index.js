@@ -135,7 +135,15 @@ function anime(results) {
     reply.setColor("#2a50a3");
     if (results.url != null) reply.setURL(results.url);
     if (results.image_url != null) reply.setThumbnail(results.image_url);
+    if (results.synopsis != null && results.synopsis.length > 2048) results.synopsis = results.synopsis.slice(0, 2045) + "...";
     if (results.synopsis != null) reply.setDescription(results.synopsis.replace(/\\n/g, ''));
+
+
+    for (const key in results) {
+        if (results.hasOwnProperty(key) && typeof results[key] == "string") {
+            if (results[key].length > 1024) results[key] = results[key].slice(0, 1021) + "...";
+        }
+    }
 
     var temp_array = [];
     if (results.title_english != null && results.title_english != results.title) temp_array.push(results.title_english);
@@ -187,7 +195,14 @@ function manga(results) {
     reply.setColor("#2a50a3");
     if (results.url != null) reply.setURL(results.url);
     if (results.image_url != null) reply.setThumbnail(results.image_url);
+    if (results.synopsis != null && results.synopsis.length > 2048) results.synopsis = results.synopsis.slice(0, 2045) + "...";
     if (results.synopsis != null) reply.setDescription(results.synopsis.replace(/\\n/g, ''));
+
+    for (const key in results) {
+        if (results.hasOwnProperty(key) && typeof results[key] == "string") {
+            if (results[key].length > 1024) results[key] = results[key].slice(0, 1021) + "...";
+        }
+    }
 
     var temp_array = [];
     if (results.title_english != null && results.title_english != results.title) temp_array.push(results.title_english);
@@ -227,7 +242,14 @@ function character(results) {
     if (results.url != null) reply.setURL(results.url);
     if (results.image_url != null) reply.setThumbnail(results.image_url);
     reply.setAuthor(`${results.member_favorites != null ? "Favorites : #" + results.member_favorites : ""}`);
+    if (results.about != null && results.about.length > 2048) results.about = results.about.slice(0, 2045) + "...";
     if (results.about != null) reply.setDescription(results.about.replace(/\\n/g, ''));
+
+    for (const key in results) {
+        if (results.hasOwnProperty(key) && typeof results[key] == "string") {
+            if (results[key].length > 1024) results[key] = results[key].slice(0, 1021) + "...";
+        }
+    }
 
     var mangaography = [];
     var animeography = [];
@@ -247,8 +269,15 @@ function person(results) {
     if (results.url != null) reply.setURL(results.url);
     if (results.image_url != null) reply.setThumbnail(results.image_url);
     if (results.member_favorites != null) reply.setAuthor(`Favorites: #${results.member_favorites}`);
+    if (results.about != null && results.about.length > 2048) results.about = results.about.slice(0, 2045) + "...";
     if (results.about != null) reply.setDescription(results.about.replace(/\\n/g, ''));
     if (results.birthday != null) reply.setFooter(`Birthday: ${results.birthday.slice(0, 10)}`);
+
+    for (const key in results) {
+        if (results.hasOwnProperty(key) && typeof results[key] == "string") {
+            if (results[key].length > 1024) results[key] = results[key].slice(0, 1021) + "...";
+        }
+    }
 
     var temp_array = [];
     if (results.family_name != null && results.family_name != results.title) temp_array.push(results.family_name);
