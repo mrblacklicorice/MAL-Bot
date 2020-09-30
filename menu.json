@@ -13,51 +13,50 @@
             "value": "gives details about the bot"
         },
         {
-            "name": "anime",
-            "value": "displays anime when given its {id}[INTGER]"
+            "name": "help {command}",
+            "value": "gives an example on how to use it"
         },
         {
-            "name": "help anime",
-            "value": "gives an example on how to use it"
+            "name": "anime",
+            "value": "displays anime when given its `{id}[INTGER]`"
         },
         {
             "name": "manga",
-            "value": "displays manga when given its {id}[INTGER]"
-        },
-        {
-            "name": "help manga",
-            "value": "gives an example on how to use it"
+            "value": "displays manga when given its `{id}[INTGER]`"
         },
         {
             "name": "character",
-            "value": "displays character when given its {id}[INTGER]"
-        },
-        {
-            "name": "help character",
-            "value": "gives an example on how to use it"
+            "value": "displays character when given its `{id}[INTGER]`"
         },
         {
             "name": "person",
-            "value": "displays person when given its {id}[INTGER]"
-        },
-        {
-            "name": "help person",
-            "value": "gives an example on how to use it"
+            "value": "displays person when given its `{id}[INTGER]`"
         },
         {
             "name": "search",
-            "value": "[BASIC] gives a list of results when given an {type}[\"anime\", \"manga\", \"person\", \"character\"] {title}[STRING]"
+            "value": "gives a list of results when given an `{type}[\"anime\", \"manga\", \"person\", \"character\"]` `{title}[STRING]`"
         },
         {
-            "name": "help search",
-            "value": "gives an example on how to use it"
+            "name": "top",
+            "value": "gives a list of results when given an `{type}[\"anime\", \"manga\", \"person\", \"character\"]`\n\n`{subtype}{Manga: [\"airing\", \"upcoming\", \"tv\", \"movie\", \"ova\", \"special\", \"bypopularity\", \"favorite\"]`\n\n`Anime: [\"manga\", \"novels\", \"oneshots\", \"doujin\", \"manhwa\", \"manhua\", \"bypopularity\", \"favorite\"]}`"
+        },
+        {
+            "name": "season",
+            "value": "gives a list of results when given an `{year}[INTGER]`\n`{season}[\"spring\", \"summer\", \"fall\", \"winter\"]`"
+        },
+        {
+            "name": "genre",
+            "value": "gives a list of results when given an `{type}[\"anime\", \"manga\"]`\n\n`{genre}{Manga: [\"Action\", \"Adventure\", \"Cars\", \"Comedy\", \"Dementia\", \"Demons\", \"Mystery\", \"Drama\", \"Ecchi\", \"Fantasy\", \"Game\", \"Hentai\", \"Historical\", \"Horror\", \"Kids\", \"Magic\", \"Martial_Arts\", \"Mecha\", \"Music\", \"Parody\", \"Samurai\", \"Romance\", \"School\", \"Sci_Fi\", \"Shoujo\", \"Shoujo_Ai\", \"Shounen\", \"Shounen_Ai\", \"Space\", \"Sports\", \"Super_Power\", \"Vampire\", \"Yaoi\", \"Yuri\", \"Harem\", \"Slice_Of_Life\", \"Supernatural\", \"Military\", \"Police\", \"Psychological\", \"Seinen\", \"Josei\", \"Doujinshi\", \"Gender_Bender\", \"Thriller\"]'\n\n'Anime: [\"Action\", \"Adventure\", \"Cars\", \"Comedy\", \"Dementia\", \"Demons\", \"Mystery\", \"Drama\", \"Ecchi\", \"Fantasy\", \"Game\", \"Hentai\", \"Historical\", \"Horror\", \"Kids\", \"Magic\", \"Martial_Arts\", \"Mecha\", \"Music\", \"Parody\", \"Samurai\", \"Romance\", \"School\", \"Sci_Fi\", \"Shoujo\", \"Shoujo_Ai\", \"Shounen\", \"Shounen_Ai\", \"Space\", \"Sports\", \"Super_Power\", \"Vampire\", \"Yaoi\", \"Yuri\", \"Harem\", \"Slice_Of_Life\", \"Supernatural\", \"Military\", \"Police\", \"Psychological\", \"Thriller\", \"Seinen\", \"Josei\"]}`"
         }
     ],
     {
-        "search": "[BASIC] m! search anime Naruto | This would result in a list of anime that matches the search of \"Naruto\"\n[BASIC] m! search character Subaru | This would result in a list of characters that matches the search of \"Subaru\"",
+        "search": "m! search anime Naruto | This would result in a list of anime that matches the search of \"Naruto\"\n\nm! search character Subaru | This would result in a list of characters that matches the search of \"Subaru\"",
         "anime": "m! anime 1 | This would result in the anime with an ID of 1",
         "manga": "m! manga 1 | This would result in the manga with an ID of 1",
         "character": "m! character 1 | This would result in the character with an ID of 1",
-        "person": "m! person 1 | This would result in the person with an ID of 1"
+        "person": "m! person 1 | This would result in the person with an ID of 1",
+        "top": "m! top anime airing | This would result in a list of top anime that are currently airing\n\nm! top character | This would result in a list of top characters",
+        "season": "m! season 2018 winter | This would result in a list of anime that aired in Winter of 2018",
+        "genre": "m! genre anime action | This would result in a list of anime that have the \"Action\" as a genre\n\nm! genre manga game | This would result in a list of manga that have the \"Game\" as a genre"
     }
 ]

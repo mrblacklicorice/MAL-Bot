@@ -91,6 +91,9 @@ client.on("message", async msg => {
             else if (commands[0] === "character") msg.channel.send(character(await mal.findCharacter(parseInt(commands[1]))));
             else if (commands[0] === "person") msg.channel.send(person(await mal.findPerson(parseInt(commands[1]))));
             else if (commands[0] === "search") search(commands, msg);
+            else if (commands[0] === "top") top(commands, msg);
+            else if (commands[0] === "season") season(commands, msg);
+            else if (commands[0] === "genre") genre(commands, msg);
 
         } catch (error) {
             msg.channel.send(`**${msg.member.nickname ? msg.member.nickname : msg.author.username}**: ${error}`);
@@ -105,7 +108,7 @@ function loadPage(content, pg_number) {
             arr[i] = `${"`"}${content[((pg_number - 1) * 5) + i].name}${"`"} - ${content[((pg_number - 1) * 5) + i].value}`;
         }
     }
-    return arr.join("\n");
+    return arr.join("\n\n");
 }
 
 const removeReaction = async (embed_msg, msg) => {
@@ -259,8 +262,7 @@ function loadBrowsePage(reply, content, pg_number, type, mal_id_container) {
     reply.fields = [];
     for (let i = 0; i < 5; i++) {
         if (content[((pg_number - 1) * 5) + i] != undefined) {
-            if (type == "anime") reply.addField(content[((pg_number - 1) * 5) + i].title, `${content[((pg_number - 1) * 5) + i].mal_id} | ${content[((pg_number - 1) * 5) + i].type} | ${content[((pg_number - 1) * 5) + i].rated}`);
-            else if (type == "manga") reply.addField(content[((pg_number - 1) * 5) + i].title, `${content[((pg_number - 1) * 5) + i].mal_id} | ${content[((pg_number - 1) * 5) + i].type}`);
+            if (type == "anime" || type == "manga") reply.addField(content[((pg_number - 1) * 5) + i].title, `${content[((pg_number - 1) * 5) + i].mal_id} | ${content[((pg_number - 1) * 5) + i].type}`);
             else if (type == "person" || type == "character") reply.addField(content[((pg_number - 1) * 5) + i].name, `${content[((pg_number - 1) * 5) + i].mal_id}`);
             mal_id_container[i] = content[((pg_number - 1) * 5) + i].mal_id;
         }
@@ -276,13 +278,9 @@ async function search(commands, msg) {
         var choices = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣'];
         var current_emoji_index;
 
-        if (commands.join(" ").includes("{") && commands.join(" ").includes("}")) {
-
-        } else {
-            if (!type.includes(commands[1])) throw "Invalid command";
-            if (commands.slice(2).join("").length < 3) throw "Search must contain 3 or more characters";
-            results = (await mal.search(commands[1], commands.slice(2).join(" "), { page: 1 })).results;
-        }
+        if (!type.includes(commands[1])) throw "Invalid command";
+        if (commands.slice(2).join("").length < 3) throw "Search must contain 3 or more characters";
+        results = (await mal.search(commands[1], commands.slice(2).join(" "), { page: 1 })).results;
 
         // New Embed
         var reply = new Discord.MessageEmbed();
@@ -345,4 +343,104 @@ async function search(commands, msg) {
     } catch (error) {
         msg.channel.send(`**${msg.member.nickname ? msg.member.nickname : msg.author.username}**: ${error}`);
     }
+}
+
+async function top(commands, msg) {
+    // try {
+    var type = ["anime", "manga", "person", "character"];
+    var anime_subtype = ["airing", "upcoming", "tv", "movie", "ova", "special", "bypopularity", "favorite"];
+    var manga_sutype = ["manga", "novels", "oneshots", "doujin", "manhwa", "manhua", "bypopularity", "favorite"];
+    var results;
+    var current_page_number = 1;
+    var mal_id_container = new Array(5);
+    var choices = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣'];
+    var current_emoji_index;
+
+
+    if ((commands.length > 2 && commands[1] != "anime" && commands[1] != "manga") || !type.includes(commands[1])) throw "Invalid command";
+
+    if (commands.length > 2) {
+        if (commands[1] == "anime") if (!anime_subtype.includes(commands[2].toLowerCase())) throw "Invalid subtype";
+        else if (commands[1] == "manga") if (!manga_subtype.includes(commands[2].toLowerCase())) throw "Invalid subtype";
+    }
+
+    if (commands.length > 2) {
+        results = (await mal.findTop(commands[1], 1, commands[1] == "anime" ? anime_subtype.findIndex(commands[2].toLowerCase()) + 1 : manga_subtype.findIndex(commands[2].toLowerCase()) + 1)).top;
+    } else {
+        results = (await mal.findTop(commands[1], 1)).top;
+    }
+
+    // New Embed
+    var reply = new Discord.MessageEmbed();
+    // Standard
+    reply.setFooter(`Requested by ${msg.member.nickname ? msg.member.nickname : msg.author.username}`, msg.author.displayAvatarURL({
+        format: "png",
+        dynamic: true
+    }));
+    reply.setColor("#2a50a3");
+    reply.setThumbnail('https://image.myanimelist.net/ui/OK6W_koKDTOqqqLDbIoPAiC8a86sHufn_jOI-JGtoCQ');
+    reply.setTimestamp();
+
+    // Dynamic
+    reply.setTitle(`**Page ${current_page_number}/${String(Math.ceil(results.length / 5))}**`);
+    reply.setDescription(`**Top ${(commands[1]).substring(0, 1).toUpperCase() + commands[1].substr(1).toLowerCase()}: **`);
+
+
+    loadBrowsePage(reply, results, current_page_number, commands[1], mal_id_container);
+
+    // Sending Embed
+    var ref_reply = await msg.channel.send(reply);
+    for (var emoji of ['◀', '1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '▶']) await ref_reply.react(emoji);
+
+    const lFilter = (reaction, user) => reaction.emoji.name === '◀' && current_page_number > 1 && user.id === msg.author.id;
+    const lCollector = ref_reply.createReactionCollector(lFilter, {
+        time: 300000
+    });
+
+    lCollector.on('collect', async () => {
+        removeReaction(ref_reply, msg);
+        current_page_number--;
+        loadBrowsePage(reply, results, current_page_number, commands[1], mal_id_container);
+        reply.setTitle(`**Page ${current_page_number}/${String(Math.ceil(results.length / 5))}**`);
+        ref_reply.edit(reply);
+    });
+
+    const rFilter = (reaction, user) => reaction.emoji.name === '▶' && current_page_number < Math.ceil(results.length / 5) && user.id === msg.author.id;
+    const rCollector = ref_reply.createReactionCollector(rFilter, {
+        time: 300000
+    });
+
+    rCollector.on('collect', async () => {
+        removeReaction(ref_reply, msg);
+        current_page_number++;
+        loadBrowsePage(reply, results, current_page_number, commands[1], mal_id_container);
+        reply.setTitle(`**Page ${current_page_number}/${String(Math.ceil(results.length / 5))}**`);
+        ref_reply.edit(reply);
+    });
+
+    const choose = (reaction, user) => { current_emoji_index = choices.indexOf(reaction.emoji.name); return choices.includes(reaction.emoji.name) && user.id === msg.author.id; };
+    const chooseCollector = ref_reply.createReactionCollector(choose, {
+        time: 300000
+    });
+
+    chooseCollector.on('collect', async () => {
+        removeReaction(ref_reply, msg);
+        if (commands[1] == "anime") msg.channel.send(anime(await mal.findAnime(mal_id_container[current_emoji_index])));
+        else if (commands[1] == "manga") msg.channel.send(manga(await mal.findManga(mal_id_container[current_emoji_index])));
+        else if (commands[1] == "person") msg.channel.send(person(await mal.findPerson(mal_id_container[current_emoji_index])));
+        else if (commands[1] == "character") msg.channel.send(character(await mal.findCharacter(mal_id_container[current_emoji_index])));
+    });
+    // } catch (error) {
+    //     msg.channel.send(`**${msg.member.nickname ? msg.member.nickname : msg.author.username}**: ${error}`);
+    // }
+}
+
+async function season(commands, msg) {
+
+}
+
+async function genre(commands, msg) {
+    var main_genre = ["Action", "Adventure", "Cars", "Comedy", "Dementia", "Demons", "Mystery", "Drama", "Ecchi", "Fantasy", "Game", "Hentai", "Historical", "Horror", "Kids", "Magic", "Martial_Arts", "Mecha", "Music", "Parody", "Samurai", "Romance", "School", "Sci_Fi", "Shoujo", "Shoujo_Ai", "Shounen", "Shounen_Ai", "Space", "Sports", "Super_Power", "Vampire", "Yaoi", "Yuri", "Harem", "Slice_Of_Life", "Supernatural", "Military", "Police", "Psychological"];
+    var anime_genre = main_genre.concat(["Thriller", "Seinen", "Josei"]);
+    var manga_genre = main_genre.concat(["Seinen", "Josei", "Doujinshi", "Gender_Bender", "Thriller"]);
 }
