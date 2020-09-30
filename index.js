@@ -4,6 +4,9 @@ const menu = require("./menu.json");
 const client = new Discord.Client();
 const Jikan = require('jikan-node');
 const mal = new Jikan();
+const fetch = require('cross-fetch');
+const { randomBytes } = require("crypto");
+const URL = require('url').URL;
 
 client.login(config.BOT_TOKEN);
 
@@ -86,6 +89,8 @@ client.on("message", async msg => {
             var commands = [];
             for (item of command.split(" ")) if (item != "") commands.push(item);
 
+            if ((commands[0] == "anime" || commands[0] == "manga" || commands[0] == "character" || commands[0] == "person") && parseInt(commands[1]) == NaN) throw "Invalid Usage";
+
             if (commands[0] === "anime") msg.channel.send(anime(await mal.findAnime(parseInt(commands[1]))));
             else if (commands[0] === "manga") msg.channel.send(manga(await mal.findManga(parseInt(commands[1]))));
             else if (commands[0] === "character") msg.channel.send(character(await mal.findCharacter(parseInt(commands[1]))));
@@ -94,7 +99,6 @@ client.on("message", async msg => {
             else if (commands[0] === "top") top(commands, msg);
             else if (commands[0] === "season") season(commands, msg);
             else if (commands[0] === "genre") genre(commands, msg);
-
         } catch (error) {
             msg.channel.send(`**${msg.member.nickname ? msg.member.nickname : msg.author.username}**: ${error}`);
         }
@@ -263,7 +267,7 @@ function loadBrowsePage(reply, content, pg_number, type, mal_id_container) {
     for (let i = 0; i < 5; i++) {
         if (content[((pg_number - 1) * 5) + i] != undefined) {
             if (type == "anime" || type == "manga") reply.addField(content[((pg_number - 1) * 5) + i].title, `${content[((pg_number - 1) * 5) + i].mal_id} | ${content[((pg_number - 1) * 5) + i].type}`);
-            else if (type == "person" || type == "character") reply.addField(content[((pg_number - 1) * 5) + i].name, `${content[((pg_number - 1) * 5) + i].mal_id}`);
+            else if (type == "person" || type == "character") reply.addField((content[((pg_number - 1) * 5) + i].name != undefined) ? content[((pg_number - 1) * 5) + i].name : content[((pg_number - 1) * 5) + i].title, `${content[((pg_number - 1) * 5) + i].mal_id}`);
             mal_id_container[i] = content[((pg_number - 1) * 5) + i].mal_id;
         }
     }
@@ -281,6 +285,8 @@ async function search(commands, msg) {
         if (!type.includes(commands[1])) throw "Invalid command";
         if (commands.slice(2).join("").length < 3) throw "Search must contain 3 or more characters";
         results = (await mal.search(commands[1], commands.slice(2).join(" "), { page: 1 })).results;
+
+        if (results.length == 0) throw "No search results found";
 
         // New Embed
         var reply = new Discord.MessageEmbed();
@@ -346,101 +352,262 @@ async function search(commands, msg) {
 }
 
 async function top(commands, msg) {
-    // try {
-    var type = ["anime", "manga", "person", "character"];
-    var anime_subtype = ["airing", "upcoming", "tv", "movie", "ova", "special", "bypopularity", "favorite"];
-    var manga_sutype = ["manga", "novels", "oneshots", "doujin", "manhwa", "manhua", "bypopularity", "favorite"];
-    var results;
-    var current_page_number = 1;
-    var mal_id_container = new Array(5);
-    var choices = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣'];
-    var current_emoji_index;
+    try {
+        var type = ["anime", "manga", "people", "characters"];
+        var anime_subtype = ["airing", "upcoming", "tv", "movie", "ova", "special", "bypopularity", "favorite"];
+        var manga_sutype = ["manga", "novels", "oneshots", "doujin", "manhwa", "manhua", "bypopularity", "favorite"];
+        var results;
+        var current_page_number = 1;
+        var mal_id_container = new Array(5);
+        var choices = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣'];
+        var current_emoji_index;
 
+        if ((commands.length > 2 && commands[1] != "anime" && commands[1] != "manga") || !type.includes(commands[1])) throw "Invalid command";
 
-    if ((commands.length > 2 && commands[1] != "anime" && commands[1] != "manga") || !type.includes(commands[1])) throw "Invalid command";
+        if (commands.length > 2) {
+            if (commands[1] == "anime") if (!anime_subtype.includes(commands[2].toLowerCase())) throw "Invalid subtype";
+            else if (commands[1] == "manga") if (!manga_subtype.includes(commands[2].toLowerCase())) throw "Invalid subtype";
+        }
 
-    if (commands.length > 2) {
-        if (commands[1] == "anime") if (!anime_subtype.includes(commands[2].toLowerCase())) throw "Invalid subtype";
-        else if (commands[1] == "manga") if (!manga_subtype.includes(commands[2].toLowerCase())) throw "Invalid subtype";
-    }
+        if (commands.length > 2) {
+            results = (await mal.findTop(commands[1], 1, commands[2])).top;
+        } else {
+            results = (await mal.findTop(commands[1], 1)).top;
+        }
 
-    if (commands.length > 2) {
-        results = (await mal.findTop(commands[1], 1, commands[1] == "anime" ? anime_subtype.findIndex(commands[2].toLowerCase()) + 1 : manga_subtype.findIndex(commands[2].toLowerCase()) + 1)).top;
-    } else {
-        results = (await mal.findTop(commands[1], 1)).top;
-    }
+        if (commands[1] == "people") commands[1] = "person";
+        else if (commands[1] == "characters") commands[1] = "character";
 
-    // New Embed
-    var reply = new Discord.MessageEmbed();
-    // Standard
-    reply.setFooter(`Requested by ${msg.member.nickname ? msg.member.nickname : msg.author.username}`, msg.author.displayAvatarURL({
-        format: "png",
-        dynamic: true
-    }));
-    reply.setColor("#2a50a3");
-    reply.setThumbnail('https://image.myanimelist.net/ui/OK6W_koKDTOqqqLDbIoPAiC8a86sHufn_jOI-JGtoCQ');
-    reply.setTimestamp();
+        if (results.length == 0) throw "No search results found";
 
-    // Dynamic
-    reply.setTitle(`**Page ${current_page_number}/${String(Math.ceil(results.length / 5))}**`);
-    reply.setDescription(`**Top ${(commands[1]).substring(0, 1).toUpperCase() + commands[1].substr(1).toLowerCase()}: **`);
+        // New Embed
+        var reply = new Discord.MessageEmbed();
+        // Standard
+        reply.setFooter(`Requested by ${msg.member.nickname ? msg.member.nickname : msg.author.username}`, msg.author.displayAvatarURL({
+            format: "png",
+            dynamic: true
+        }));
+        reply.setColor("#2a50a3");
+        reply.setThumbnail('https://image.myanimelist.net/ui/OK6W_koKDTOqqqLDbIoPAiC8a86sHufn_jOI-JGtoCQ');
+        reply.setTimestamp();
 
-
-    loadBrowsePage(reply, results, current_page_number, commands[1], mal_id_container);
-
-    // Sending Embed
-    var ref_reply = await msg.channel.send(reply);
-    for (var emoji of ['◀', '1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '▶']) await ref_reply.react(emoji);
-
-    const lFilter = (reaction, user) => reaction.emoji.name === '◀' && current_page_number > 1 && user.id === msg.author.id;
-    const lCollector = ref_reply.createReactionCollector(lFilter, {
-        time: 300000
-    });
-
-    lCollector.on('collect', async () => {
-        removeReaction(ref_reply, msg);
-        current_page_number--;
-        loadBrowsePage(reply, results, current_page_number, commands[1], mal_id_container);
+        // Dynamic
         reply.setTitle(`**Page ${current_page_number}/${String(Math.ceil(results.length / 5))}**`);
-        ref_reply.edit(reply);
-    });
+        reply.setDescription(`**Top ${(commands[1]).charAt(0).toUpperCase() + commands[1].substr(1).toLowerCase()}: **`);
 
-    const rFilter = (reaction, user) => reaction.emoji.name === '▶' && current_page_number < Math.ceil(results.length / 5) && user.id === msg.author.id;
-    const rCollector = ref_reply.createReactionCollector(rFilter, {
-        time: 300000
-    });
 
-    rCollector.on('collect', async () => {
-        removeReaction(ref_reply, msg);
-        current_page_number++;
         loadBrowsePage(reply, results, current_page_number, commands[1], mal_id_container);
-        reply.setTitle(`**Page ${current_page_number}/${String(Math.ceil(results.length / 5))}**`);
-        ref_reply.edit(reply);
-    });
 
-    const choose = (reaction, user) => { current_emoji_index = choices.indexOf(reaction.emoji.name); return choices.includes(reaction.emoji.name) && user.id === msg.author.id; };
-    const chooseCollector = ref_reply.createReactionCollector(choose, {
-        time: 300000
-    });
+        // Sending Embed
+        var ref_reply = await msg.channel.send(reply);
+        for (var emoji of ['◀', '1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '▶']) await ref_reply.react(emoji);
 
-    chooseCollector.on('collect', async () => {
-        removeReaction(ref_reply, msg);
-        if (commands[1] == "anime") msg.channel.send(anime(await mal.findAnime(mal_id_container[current_emoji_index])));
-        else if (commands[1] == "manga") msg.channel.send(manga(await mal.findManga(mal_id_container[current_emoji_index])));
-        else if (commands[1] == "person") msg.channel.send(person(await mal.findPerson(mal_id_container[current_emoji_index])));
-        else if (commands[1] == "character") msg.channel.send(character(await mal.findCharacter(mal_id_container[current_emoji_index])));
-    });
-    // } catch (error) {
-    //     msg.channel.send(`**${msg.member.nickname ? msg.member.nickname : msg.author.username}**: ${error}`);
-    // }
+        const lFilter = (reaction, user) => reaction.emoji.name === '◀' && current_page_number > 1 && user.id === msg.author.id;
+        const lCollector = ref_reply.createReactionCollector(lFilter, {
+            time: 300000
+        });
+
+        lCollector.on('collect', async () => {
+            removeReaction(ref_reply, msg);
+            current_page_number--;
+            loadBrowsePage(reply, results, current_page_number, commands[1], mal_id_container);
+            reply.setTitle(`**Page ${current_page_number}/${String(Math.ceil(results.length / 5))}**`);
+            ref_reply.edit(reply);
+        });
+
+        const rFilter = (reaction, user) => reaction.emoji.name === '▶' && current_page_number < Math.ceil(results.length / 5) && user.id === msg.author.id;
+        const rCollector = ref_reply.createReactionCollector(rFilter, {
+            time: 300000
+        });
+
+        rCollector.on('collect', async () => {
+            removeReaction(ref_reply, msg);
+            current_page_number++;
+            loadBrowsePage(reply, results, current_page_number, commands[1], mal_id_container);
+            reply.setTitle(`**Page ${current_page_number}/${String(Math.ceil(results.length / 5))}**`);
+            ref_reply.edit(reply);
+        });
+
+        const choose = (reaction, user) => { current_emoji_index = choices.indexOf(reaction.emoji.name); return choices.includes(reaction.emoji.name) && user.id === msg.author.id; };
+        const chooseCollector = ref_reply.createReactionCollector(choose, {
+            time: 300000
+        });
+
+        chooseCollector.on('collect', async () => {
+            removeReaction(ref_reply, msg);
+            if (commands[1] == "anime") msg.channel.send(anime(await mal.findAnime(mal_id_container[current_emoji_index])));
+            else if (commands[1] == "manga") msg.channel.send(manga(await mal.findManga(mal_id_container[current_emoji_index])));
+            else if (commands[1] == "person") msg.channel.send(person(await mal.findPerson(mal_id_container[current_emoji_index])));
+            else if (commands[1] == "character") msg.channel.send(character(await mal.findCharacter(mal_id_container[current_emoji_index])));
+        });
+    } catch (error) {
+        msg.channel.send(`**${msg.member.nickname ? msg.member.nickname : msg.author.username}**: ${error}`);
+    }
 }
 
 async function season(commands, msg) {
+    try {
+        var season_choices = ["spring", "summer", "fall", "winter"];
+        var results;
+        var current_page_number = 1;
+        var mal_id_container = new Array(5);
+        var choices = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣'];
+        var current_emoji_index;
 
+        var max = ((await (await fetch(new URL("https://api.jikan.moe/v3/season/archive"))).json()).archive[0]).year;
+
+        if (parseInt(commands[1]) < 1917 || parseInt(commands[1]) > max) throw "Invalid Year";
+        if (!season_choices.includes(commands[2].toLowerCase())) throw "Invalid Season";
+
+        results = (await mal.findSeason(parseInt(commands[1]), commands[2])).anime;
+
+        if (results.length == 0) throw "No search results found";
+
+        // New Embed
+        var reply = new Discord.MessageEmbed();
+        // Standard
+        reply.setFooter(`Requested by ${msg.member.nickname ? msg.member.nickname : msg.author.username}`, msg.author.displayAvatarURL({
+            format: "png",
+            dynamic: true
+        }));
+        reply.setColor("#2a50a3");
+        reply.setThumbnail('https://image.myanimelist.net/ui/OK6W_koKDTOqqqLDbIoPAiC8a86sHufn_jOI-JGtoCQ');
+        reply.setTimestamp();
+
+        // Dynamic
+        reply.setTitle(`**Page ${current_page_number}/${String(Math.ceil(results.length / 5))}**`);
+        reply.setDescription(`**Anime from ${(commands[2]).charAt(0).toUpperCase() + commands[2].substr(1).toLowerCase()} of ${String(parseInt(commands[1]))}: **`);
+
+
+        loadBrowsePage(reply, results, current_page_number, "anime", mal_id_container);
+
+        // Sending Embed
+        var ref_reply = await msg.channel.send(reply);
+        for (var emoji of ['◀', '1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '▶']) await ref_reply.react(emoji);
+
+        const lFilter = (reaction, user) => reaction.emoji.name === '◀' && current_page_number > 1 && user.id === msg.author.id;
+        const lCollector = ref_reply.createReactionCollector(lFilter, {
+            time: 300000
+        });
+
+        lCollector.on('collect', async () => {
+            removeReaction(ref_reply, msg);
+            current_page_number--;
+            loadBrowsePage(reply, results, current_page_number, "anime", mal_id_container);
+            reply.setTitle(`**Page ${current_page_number}/${String(Math.ceil(results.length / 5))}**`);
+            ref_reply.edit(reply);
+        });
+
+        const rFilter = (reaction, user) => reaction.emoji.name === '▶' && current_page_number < Math.ceil(results.length / 5) && user.id === msg.author.id;
+        const rCollector = ref_reply.createReactionCollector(rFilter, {
+            time: 300000
+        });
+
+        rCollector.on('collect', async () => {
+            removeReaction(ref_reply, msg);
+            current_page_number++;
+            loadBrowsePage(reply, results, current_page_number, "anime", mal_id_container);
+            reply.setTitle(`**Page ${current_page_number}/${String(Math.ceil(results.length / 5))}**`);
+            ref_reply.edit(reply);
+        });
+
+        const choose = (reaction, user) => { current_emoji_index = choices.indexOf(reaction.emoji.name); return choices.includes(reaction.emoji.name) && user.id === msg.author.id; };
+        const chooseCollector = ref_reply.createReactionCollector(choose, {
+            time: 300000
+        });
+
+        chooseCollector.on('collect', async () => {
+            removeReaction(ref_reply, msg);
+            msg.channel.send(anime(await mal.findAnime(mal_id_container[current_emoji_index])));
+        });
+    } catch (error) {
+        msg.channel.send(`**${msg.member.nickname ? msg.member.nickname : msg.author.username}**: ${error}`);
+    }
 }
 
 async function genre(commands, msg) {
-    var main_genre = ["Action", "Adventure", "Cars", "Comedy", "Dementia", "Demons", "Mystery", "Drama", "Ecchi", "Fantasy", "Game", "Hentai", "Historical", "Horror", "Kids", "Magic", "Martial_Arts", "Mecha", "Music", "Parody", "Samurai", "Romance", "School", "Sci_Fi", "Shoujo", "Shoujo_Ai", "Shounen", "Shounen_Ai", "Space", "Sports", "Super_Power", "Vampire", "Yaoi", "Yuri", "Harem", "Slice_Of_Life", "Supernatural", "Military", "Police", "Psychological"];
-    var anime_genre = main_genre.concat(["Thriller", "Seinen", "Josei"]);
-    var manga_genre = main_genre.concat(["Seinen", "Josei", "Doujinshi", "Gender_Bender", "Thriller"]);
+    try {
+        var main_genre = ["Action", "Adventure", "Cars", "Comedy", "Dementia", "Demons", "Mystery", "Drama", "Ecchi", "Fantasy", "Game", "Hentai", "Historical", "Horror", "Kids", "Magic", "Martial_Arts", "Mecha", "Music", "Parody", "Samurai", "Romance", "School", "Sci_Fi", "Shoujo", "Shoujo_Ai", "Shounen", "Shounen_Ai", "Space", "Sports", "Super_Power", "Vampire", "Yaoi", "Yuri", "Harem", "Slice_Of_Life", "Supernatural", "Military", "Police", "Psychological"];
+        var anime_genre = main_genre.concat(["Thriller", "Seinen", "Josei"]);
+        var manga_genre = main_genre.concat(["Seinen", "Josei", "Doujinshi", "Gender_Bender", "Thriller"]);
+        var results;
+        var current_page_number = 1;
+        var mal_id_container = new Array(5);
+        var choices = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣'];
+        var current_emoji_index;
+
+        commands[2] = (commands.slice(2)).join("_");
+        commands[2] = ((commands[2].split("_")).map(x => x.charAt(0).toUpperCase() + x.substr(1).toLowerCase())).join("_");
+
+        if (commands[1] == "anime") {
+            if (!anime_genre.includes(commands[2])) throw "Invalid Genre"
+            else results = (await mal.findGenre(commands[1], anime_genre.indexOf(commands[2]) + 1, 1))[commands[1]];
+        } else if (commands[1] == "manga") {
+            if (!manga_genre.includes(commands[2])) throw "Invalid Genre";
+            else results = (await mal.findGenre(commands[1], manga_genre.indexOf(commands[2]) + 1, 1))[commands[1]];
+        } else {
+            throw "Invalid type";
+        }
+
+        if (results.length == 0) throw "No search results found";
+
+        // New Embed
+        var reply = new Discord.MessageEmbed();
+        // Standard
+        reply.setFooter(`Requested by ${msg.member.nickname ? msg.member.nickname : msg.author.username}`, msg.author.displayAvatarURL({
+            format: "png",
+            dynamic: true
+        }));
+        reply.setColor("#2a50a3");
+        reply.setThumbnail('https://image.myanimelist.net/ui/OK6W_koKDTOqqqLDbIoPAiC8a86sHufn_jOI-JGtoCQ');
+        reply.setTimestamp();
+
+        // Dynamic
+        reply.setTitle(`**Page ${current_page_number}/${String(Math.ceil(results.length / 5))}**`);
+        reply.setDescription(`**${commands[2].replace(/_/g, " ")} ${commands[1] == "anime" ? "Anime" : "Manga"}s: **`);
+        loadBrowsePage(reply, results, current_page_number, commands[1], mal_id_container);
+
+        // Sending Embed
+        var ref_reply = await msg.channel.send(reply);
+        for (var emoji of ['◀', '1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '▶']) await ref_reply.react(emoji);
+
+        const lFilter = (reaction, user) => reaction.emoji.name === '◀' && current_page_number > 1 && user.id === msg.author.id;
+        const lCollector = ref_reply.createReactionCollector(lFilter, {
+            time: 300000
+        });
+
+        lCollector.on('collect', async () => {
+            removeReaction(ref_reply, msg);
+            current_page_number--;
+            loadBrowsePage(reply, results, current_page_number, commands[1], mal_id_container);
+            reply.setTitle(`**Page ${current_page_number}/${String(Math.ceil(results.length / 5))}**`);
+            ref_reply.edit(reply);
+        });
+
+        const rFilter = (reaction, user) => reaction.emoji.name === '▶' && current_page_number < Math.ceil(results.length / 5) && user.id === msg.author.id;
+        const rCollector = ref_reply.createReactionCollector(rFilter, {
+            time: 300000
+        });
+
+        rCollector.on('collect', async () => {
+            removeReaction(ref_reply, msg);
+            current_page_number++;
+            loadBrowsePage(reply, results, current_page_number, commands[1], mal_id_container);
+            reply.setTitle(`**Page ${current_page_number}/${String(Math.ceil(results.length / 5))}**`);
+            ref_reply.edit(reply);
+        });
+
+        const choose = (reaction, user) => { current_emoji_index = choices.indexOf(reaction.emoji.name); return choices.includes(reaction.emoji.name) && user.id === msg.author.id; };
+        const chooseCollector = ref_reply.createReactionCollector(choose, {
+            time: 300000
+        });
+
+        chooseCollector.on('collect', async () => {
+            removeReaction(ref_reply, msg);
+            if (commands[1] == "anime") msg.channel.send(anime(await mal.findAnime(mal_id_container[current_emoji_index])));
+            else if (commands[1] == "manga") msg.channel.send(manga(await mal.findManga(mal_id_container[current_emoji_index])));
+        });
+    } catch (error) {
+        msg.channel.send(`**${msg.member.nickname ? msg.member.nickname : msg.author.username}**: ${error}`);
+    }
 }

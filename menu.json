@@ -38,7 +38,7 @@
         },
         {
             "name": "top",
-            "value": "gives a list of results when given an `{type}[\"anime\", \"manga\", \"person\", \"character\"]`\n\n`{subtype}{Manga: [\"airing\", \"upcoming\", \"tv\", \"movie\", \"ova\", \"special\", \"bypopularity\", \"favorite\"]`\n\n`Anime: [\"manga\", \"novels\", \"oneshots\", \"doujin\", \"manhwa\", \"manhua\", \"bypopularity\", \"favorite\"]}`"
+            "value": "gives a list of results when given an `{type}[\"anime\", \"manga\", \"people\", \"characters\"]`\n\n`{subtype}{Manga: [\"manga\", \"novels\", \"oneshots\", \"doujin\", \"manhwa\", \"manhua\", \"bypopularity\", \"favorite\"]`\n\n`Anime: [\"airing\", \"upcoming\", \"tv\", \"movie\", \"ova\", \"special\", \"bypopularity\", \"favorite\"]}`"
         },
         {
             "name": "season",
