@@ -253,9 +253,9 @@ function character(results) {
 
     var mangaography = [];
     var animeography = [];
+    for (let i = 0; i < 5; i++) if (results.mangaography[i] != null) mangaography.push(`${results.mangaography[i].name}(${results.mangaography[i].mal_id})[${results.mangaography[i].role}]`);
+    for (let i = 0; i < 5; i++) if (results.animeography[i] != null) animeography.push(`${results.animeography[i].name}(${results.animeography[i].mal_id})[${results.animeography[i].role}]`);
 
-    for (var item of results.mangaography) mangaography.push(`${item.name}(${item.mal_id})[${item.role}]`);
-    for (var item of results.animeography) animeography.push(`${item.name}(${item.mal_id})[${item.role}]`);
     reply.setFooter("Manga: " + mangaography.join(", ") + "\nAnime: " + animeography.join(", "));
 
     // attributes
