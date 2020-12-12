@@ -18,7 +18,7 @@ client.on('ready', () => {
 
 
 client.on("message", async msg => {
-    if (msg.content === "oh Malbot you're so cute") msg.reply("You too, UwU :heart:");
+    if (msg.content === "oh MAL Bot, you're so cute") msg.reply("You too, UwU :heart:");
     if (msg.author.bot || !msg.content.startsWith(prefix)) return;
     const command = msg.content.slice(prefix.length).trim().toLowerCase();
 
@@ -41,7 +41,7 @@ client.on("message", async msg => {
             var menu_msg = await msg.channel.send(help_msg);
             for (var emoji of ['◀', '▶']) await menu_msg.react(emoji);
 
-            const lFilter = (reaction, user) => reaction.emoji.name === '◀' && current_page_number > 1 && user.id === msg.author.id;
+            const lFilter = (reaction, user) => reaction.emoji.name === '◀' && current_page_number > 1;
             const lCollector = menu_msg.createReactionCollector(lFilter, {
                 time: 300000
             });
@@ -54,7 +54,7 @@ client.on("message", async msg => {
                 menu_msg.edit(help_msg);
             });
 
-            const rFilter = (reaction, user) => reaction.emoji.name === '▶' && current_page_number < Math.ceil(menu[0].length / 5) && user.id === msg.author.id;
+            const rFilter = (reaction, user) => reaction.emoji.name === '▶' && current_page_number < Math.ceil(menu[0].length / 5);
             const rCollector = menu_msg.createReactionCollector(rFilter, {
                 time: 300000
             });
@@ -73,7 +73,7 @@ client.on("message", async msg => {
         }
 
     } else if (command === "ping") {
-        msg.channel.send(`**${msg.member.nickname ? msg.member.nickname : msg.author.username}**: Pong! This message had a latency of ${msg.createdTimestamp - Date.now()}ms.`);
+        msg.channel.send(`**${msg.member.nickname ? msg.member.nickname : msg.author.username}**: Pong! This message had a latency of ${Date.now() - msg.createdTimestamp}ms.`);
     } else if (command === "about") {
         msg.channel.send("Hello **" + msg.member.nickname + "**! I'm MAL-Bot and I display information from My AnimeList using the Jikan(時間) API");
         msg.channel.send("You can find me here: <https://github.com/mrblacklicorice/MAL-Bot/blob/master/README.md>");
@@ -341,7 +341,7 @@ async function search(commands, msg) {
         var ref_reply = await msg.channel.send(reply);
         for (var emoji of ['◀', '1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '▶']) await ref_reply.react(emoji);
 
-        const lFilter = (reaction, user) => reaction.emoji.name === '◀' && current_page_number > 1 && user.id === msg.author.id;
+        const lFilter = (reaction, user) => reaction.emoji.name === '◀' && current_page_number > 1;
         const lCollector = ref_reply.createReactionCollector(lFilter, {
             time: 300000
         });
@@ -354,7 +354,7 @@ async function search(commands, msg) {
             ref_reply.edit(reply);
         });
 
-        const rFilter = (reaction, user) => reaction.emoji.name === '▶' && current_page_number < Math.ceil(results.length / 5) && user.id === msg.author.id;
+        const rFilter = (reaction, user) => reaction.emoji.name === '▶' && current_page_number < Math.ceil(results.length / 5);
         const rCollector = ref_reply.createReactionCollector(rFilter, {
             time: 300000
         });
@@ -367,7 +367,7 @@ async function search(commands, msg) {
             ref_reply.edit(reply);
         });
 
-        const choose = (reaction, user) => { current_emoji_index = choices.indexOf(reaction.emoji.name); return choices.includes(reaction.emoji.name) && user.id === msg.author.id; };
+        const choose = (reaction, user) => { current_emoji_index = choices.indexOf(reaction.emoji.name); return choices.includes(reaction.emoji.name); };
         const chooseCollector = ref_reply.createReactionCollector(choose, {
             time: 300000
         });
@@ -435,7 +435,7 @@ async function top(commands, msg) {
         var ref_reply = await msg.channel.send(reply);
         for (var emoji of ['◀', '1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '▶']) await ref_reply.react(emoji);
 
-        const lFilter = (reaction, user) => reaction.emoji.name === '◀' && current_page_number > 1 && user.id === msg.author.id;
+        const lFilter = (reaction, user) => reaction.emoji.name === '◀' && current_page_number > 1;
         const lCollector = ref_reply.createReactionCollector(lFilter, {
             time: 300000
         });
@@ -448,7 +448,7 @@ async function top(commands, msg) {
             ref_reply.edit(reply);
         });
 
-        const rFilter = (reaction, user) => reaction.emoji.name === '▶' && current_page_number < Math.ceil(results.length / 5) && user.id === msg.author.id;
+        const rFilter = (reaction, user) => reaction.emoji.name === '▶' && current_page_number < Math.ceil(results.length / 5);
         const rCollector = ref_reply.createReactionCollector(rFilter, {
             time: 300000
         });
@@ -461,7 +461,7 @@ async function top(commands, msg) {
             ref_reply.edit(reply);
         });
 
-        const choose = (reaction, user) => { current_emoji_index = choices.indexOf(reaction.emoji.name); return choices.includes(reaction.emoji.name) && user.id === msg.author.id; };
+        const choose = (reaction, user) => { current_emoji_index = choices.indexOf(reaction.emoji.name); return choices.includes(reaction.emoji.name); };
         const chooseCollector = ref_reply.createReactionCollector(choose, {
             time: 300000
         });
@@ -518,7 +518,7 @@ async function season(commands, msg) {
         var ref_reply = await msg.channel.send(reply);
         for (var emoji of ['◀', '1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '▶']) await ref_reply.react(emoji);
 
-        const lFilter = (reaction, user) => reaction.emoji.name === '◀' && current_page_number > 1 && user.id === msg.author.id;
+        const lFilter = (reaction, user) => reaction.emoji.name === '◀' && current_page_number > 1;
         const lCollector = ref_reply.createReactionCollector(lFilter, {
             time: 300000
         });
@@ -531,7 +531,7 @@ async function season(commands, msg) {
             ref_reply.edit(reply);
         });
 
-        const rFilter = (reaction, user) => reaction.emoji.name === '▶' && current_page_number < Math.ceil(results.length / 5) && user.id === msg.author.id;
+        const rFilter = (reaction, user) => reaction.emoji.name === '▶' && current_page_number < Math.ceil(results.length / 5);
         const rCollector = ref_reply.createReactionCollector(rFilter, {
             time: 300000
         });
@@ -544,7 +544,7 @@ async function season(commands, msg) {
             ref_reply.edit(reply);
         });
 
-        const choose = (reaction, user) => { current_emoji_index = choices.indexOf(reaction.emoji.name); return choices.includes(reaction.emoji.name) && user.id === msg.author.id; };
+        const choose = (reaction, user) => { current_emoji_index = choices.indexOf(reaction.emoji.name); return choices.includes(reaction.emoji.name); };
         const chooseCollector = ref_reply.createReactionCollector(choose, {
             time: 300000
         });
@@ -604,7 +604,7 @@ async function genre(commands, msg) {
         var ref_reply = await msg.channel.send(reply);
         for (var emoji of ['◀', '1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '▶']) await ref_reply.react(emoji);
 
-        const lFilter = (reaction, user) => reaction.emoji.name === '◀' && current_page_number > 1 && user.id === msg.author.id;
+        const lFilter = (reaction, user) => reaction.emoji.name === '◀' && current_page_number > 1;
         const lCollector = ref_reply.createReactionCollector(lFilter, {
             time: 300000
         });
@@ -617,7 +617,7 @@ async function genre(commands, msg) {
             ref_reply.edit(reply);
         });
 
-        const rFilter = (reaction, user) => reaction.emoji.name === '▶' && current_page_number < Math.ceil(results.length / 5) && user.id === msg.author.id;
+        const rFilter = (reaction, user) => reaction.emoji.name === '▶' && current_page_number < Math.ceil(results.length / 5);
         const rCollector = ref_reply.createReactionCollector(rFilter, {
             time: 300000
         });
@@ -630,7 +630,7 @@ async function genre(commands, msg) {
             ref_reply.edit(reply);
         });
 
-        const choose = (reaction, user) => { current_emoji_index = choices.indexOf(reaction.emoji.name); return choices.includes(reaction.emoji.name) && user.id === msg.author.id; };
+        const choose = (reaction, user) => { current_emoji_index = choices.indexOf(reaction.emoji.name); return choices.includes(reaction.emoji.name); };
         const chooseCollector = ref_reply.createReactionCollector(choose, {
             time: 300000
         });
