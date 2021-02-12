@@ -19,7 +19,7 @@ client.on('ready', () => {
 
 client.on("message", async msg => {
     msg.content = (msg.content).toLowerCase();
-    if (msg.content === "oh Malbot you're so cute") msg.reply("You too, UwU :heart:");
+    if (msg.content === "oh malbot you're so cute") msg.reply("You too, UwU :heart:");
     if (msg.author.bot || !msg.content.startsWith(prefix)) return;
     const command = msg.content.slice(prefix.length).trim();
 
