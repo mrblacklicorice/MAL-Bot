@@ -10,3 +10,5 @@ Created by none other than mrblacklicorice.
 This bot can display information about `Anime`, `Manga`, `Character`, `Person`.
 
 This bot can also display results from `Search`, `Top`, `Gnere`, `Season`. 
+
+Click this link to add the bot to your Discord server: https://discord.com/api/oauth2/authorize?client_id=753825107490897982&permissions=1610742848&scope=bot.
